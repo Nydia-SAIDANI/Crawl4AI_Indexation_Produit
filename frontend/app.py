@@ -1,3 +1,4 @@
+import requests
 import streamlit as st
 
 st.title("Mini Site de Test")
@@ -11,10 +12,13 @@ st.subheader("Posez vos questions")
 question = st.text_input("Posez une question sur les produits à analyser :")
 
 if st.button("Poser la question"):
-    # on va appeler ton backend ici
     with st.spinner("Analyse en cours..."):
-        st.success("Requête envoyée ! (à remplacer par vraie logique)")
-
-    # (à remplacer par l’appel réel à l’API plus tard)
-    st.subheader("Réponse IA :")
-    st.write("Le produit le moins cher est le T-shirt bio coton à 14,99 €.")
+        urls = [url for url in [url1, url2, url3] if url]
+        payload = {"urls": urls, "question": question}
+        try:
+            response = requests.post("http://localhost:8000/analyse", json=payload)
+            result = response.json()
+            st.subheader("Réponse IA :")
+            st.write(result.get("answer", "Aucune réponse"))
+        except Exception as e:
+            st.error(f"Erreur : {e}")
