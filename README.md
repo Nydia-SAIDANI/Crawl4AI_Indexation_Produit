@@ -22,3 +22,21 @@ uvicorn backend.main:app --reload
 Validation du fonctionnement:
 Exécution sur : 
 INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+
+Web cwawling and scraping 
+
+Install Crawl4AI and its dependencies
+pip install -U crawl4ai
+
+Installs browser dependencies for dynamic crawling
+python -m playwright install --with-deps chromium
+
+Installation validation:
+crawl4ai-doctor -didn't work
+"C:/Users/Admin/AppData/Roaming/Python/Python313/Scripts/crawl4ai-doctor.exe"
+
+Lancer l'app avec FastApi
+uvicorn main:app --host 127.0.0.1 --port 8000
+
+openai API Key
+https://platform.openai.com/api-keys
