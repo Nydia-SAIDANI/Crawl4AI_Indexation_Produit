@@ -4,6 +4,7 @@ from typing import List
 from crawl4ai import AsyncWebCrawler, CrawlerRunConfig, LLMConfig, LLMExtractionStrategy
 from crawl4ai.chunking_strategy import OverlappingWindowChunking
 from models.product import ProductInfo
+import json
 
 def merge_chunks(extracted_chunks: list) -> dict:
     merged = {}
@@ -46,11 +47,11 @@ Indique "non trouvé" si un champ manque.
                 else:
                     results.append(extracted)
             except Exception as e:
-                results.append({"error": str(e)})
+                results.append({"error lors de l'extraction depuis l'URL": str(e)})
     return results
 
 def ensure_products_are_dicts(products):
-    import json
+
     proper_products = []
     for prod in products:
         if isinstance(prod, str):

@@ -1,13 +1,13 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List
-#import asyncio
 import sys
 import asyncio
-
+import os
 from services.extractor import extract_products_llm, ensure_products_are_dicts
 from services.indexer import index_products
 from services.rag import generate_llm_answer
+import traceback
 
 app = FastAPI()
 
@@ -33,23 +33,33 @@ async def extract_products(request: URLRequest):
         memory_store["products"] = products
         return {"products": products}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        # Afficher les détails de l'erreur dans le terminal
+        traceback.print_exc()  
+        raise HTTPException(status_code=500, detail=f"Erreur lors de l'extraction des produits: {str(e)}")
+    
 
 @app.post("/ask")
 def ask_question(request: QuestionRequest):
-    collection = memory_store.get("collection")
-    if not collection:
-        raise HTTPException(status_code=400, detail="Aucune donnée indexée. Appelez /extract d'abord.")
-    
-    results = collection.query(query_texts=[request.question], n_results=3)
-    metadatas = results["metadatas"][0]
-    context = "\n".join(
-        f"Produit : {m.get('titre', 'non trouvé')}\nPrix : {m.get('prix', 'non trouvé')}\nDescription : {m.get('description', 'non trouvé')}\nImage : {m.get('image_url', 'non trouvé')}\n"
-        for m in metadatas
-    )
-    answer = generate_llm_answer(request.question, context, os.getenv("OPENAI_API_KEY"))
-    return {"answer": answer}
+    try:
+        collection = memory_store.get("collection")
+        if not collection:
+            raise HTTPException(status_code=400, detail="Aucune donnée indexée.")
 
+        results = collection.query(query_texts=[request.question], n_results=3)
+        metadatas = results["metadatas"][0]
+        context = "\n".join(
+            f"Produit : {m.get('titre', 'non trouvé')}\nPrix : {m.get('prix', 'non trouvé')}\nDescription : {m.get('description', 'non trouvé')}\nImage : {m.get('image_url', 'non trouvé')}\n"
+            for m in metadatas
+        )
+        answer = generate_llm_answer(request.question, context, os.getenv("OPENAI_API_KEY"))
+        return {"answer": answer}
+
+    except HTTPException:
+       
+        raise
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur lors de la génération de la réponse: {str(e)}")
 
 """import sys
 import asyncio
