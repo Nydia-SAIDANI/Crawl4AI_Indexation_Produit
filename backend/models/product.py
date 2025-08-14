@@ -1,7 +1,7 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 class ProductInfo(BaseModel):
-    titre: str = Field(..., description="Titre du produit")
-    description: str = Field(..., description="Description du produit")
-    prix: str = Field(..., description="Prix")
-    image_url: str = Field(..., description="URL de l’image")
+    titre: str
+    description: str
+    prix: str
+    image: str

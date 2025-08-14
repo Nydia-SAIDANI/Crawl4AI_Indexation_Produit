@@ -1,35 +1,28 @@
-import requests
 import streamlit as st
+import requests
 
-st.title("Mini Site de Test")
-st.write("Entrez jusqu'à 3 URLs de produits à analyser")
+st.title("🛍️ Analyse de produits E-commerce")
 
-url1 = st.text_input("URL 1")
-url2 = st.text_input("URL 2 (optionnel)")
-url3 = st.text_input("URL 3 (optionnel)")
-
+url = st.text_input("Entrez l'URL de la catégorie produit", placeholder="https://www.zara.com/...")
 st.subheader("Posez vos questions")
 question = st.text_input("Posez une question sur les produits à analyser :")
 
-if st.button("Poser la question"):
-    with st.spinner("Analyse en cours..."):
-        urls = [url for url in [url1, url2, url3] if url]
-        if not urls or not question:
-            st.error("Veuillez entrer au moins une URL et une question.")
-        else:
+if st.button("Analyser et répondre"):
+    if url and question:
+        with st.spinner("🔄 Traitement en cours..."):
             try:
-                # Étape 1 : Appeler /extract pour récupérer et indexer les produits
-                extract_response = requests.post("http://localhost:8000/extract", json={"urls": urls})
-                extract_response.raise_for_status()
-
-                # Étape 2 : Appeler /ask pour poser la question
-                ask_response = requests.post("http://localhost:8000/ask", json={"question": question})
-                ask_response.raise_for_status()
-                result = ask_response.json()
-
-                st.subheader("Réponse IA :")
-                st.write(result.get("answer", "Aucune réponse"))
-            except requests.exceptions.RequestException as e:
-                st.error(f"Erreur de requête : {e}")
+                response = requests.post(
+                    "http://localhost:8000/analyze",
+                    json={"url": url, "question": question}
+                )
+                if response.status_code == 200:
+                    result = response.json()
+                    st.success("✅ Extraction réussie !")
+                    # st.dataframe(result["products"])
+                    st.markdown(f"**💬 Réponse :** {result['answer']}")
+                else:
+                    st.error(f"❌ Erreur serveur : {response.status_code} - {response.text}")
             except Exception as e:
-                st.error(f"Erreur inattendue : {e}")
+                st.error(f"❌ Erreur de connexion au backend : {e}")
+    else:
+        st.warning("⚠️ Veuillez entrer une URL et une question.")
