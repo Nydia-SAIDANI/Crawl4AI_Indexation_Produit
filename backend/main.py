@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 import asyncio
 
-from services.product_scraper import scrape_products_from_category
+from services.product_scraper import scrape_multiple_categories, scrape_products_from_category
 from services.vector_store import add_products, search_products
 
 from services.rag import answer_question_with_rag
@@ -23,14 +23,14 @@ app.add_middleware(
 
 
 class AnalyzeRequest(BaseModel):
-    url: str
+    urls: list[str]
     question: str
 
 @app.post("/analyze")
 async def analyze_url(request: AnalyzeRequest):
     try:
-        # 1️⃣ Scraper
-        products = await scrape_products_from_category(request.url)
+        # 1️⃣ Scraper toutes les URLs
+        products = await scrape_multiple_categories(request.urls)
 
         if not isinstance(products, list) or not all(isinstance(p, dict) for p in products):
             return {"error": "Les données ne sont pas valides."}
@@ -38,11 +38,12 @@ async def analyze_url(request: AnalyzeRequest):
         # 2️⃣ Stocker dans Chroma
         add_products(products)
 
-        # 3️⃣ RAG : recherche + réponse
+        # 3️⃣ RAG
         docs = search_products(request.question, n_results=5)
-
-        # On combine les documents pour le contexte
-        context = "\n\n".join([doc for doc in docs["documents"][0]])
+        """context = "\n\n".join(docs["documents"][0])"""
+        context = "\n\n".join(
+    [doc for docs_list in docs["documents"] for doc in docs_list]
+)
         rag_answer = answer_question_with_rag(request.question, context)
 
         return {

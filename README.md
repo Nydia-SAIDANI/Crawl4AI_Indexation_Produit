@@ -40,3 +40,14 @@ uvicorn main:app --host 127.0.0.1 --port 8000
 
 openai API Key
 https://platform.openai.com/api-keys
+
+
+
+1. Copier `.env.example` en `.env` et mettre vos clés API.
+2. Installer Docker et Docker Compose.
+3. Depuis la racine du projet, lancer :
+
+docker-compose up --build
+4. Accéder au frontend : http://localhost:8501
+   Accéder au backend : http://localhost:8000
+   

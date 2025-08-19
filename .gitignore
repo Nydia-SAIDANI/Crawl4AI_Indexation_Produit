@@ -10,3 +10,4 @@ venv/
 env/
 ENV/
 .venv/
+backend/chroma_db/
