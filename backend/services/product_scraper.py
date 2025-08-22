@@ -13,18 +13,18 @@ async def scrape_products_from_category(category_url: str, browser, max_products
     page = await browser.new_page()
     await page.goto(category_url, timeout=60000)
 
-    print(f"🌐 Scraping de {category_url}")
-    print("🔄 Attente du conteneur principal...")
+    print(f"Scraping de {category_url}")
+    print("Attente du conteneur principal...")
     await page.wait_for_selector("ul.product-grid__product-list")
 
-    print("⬇️ Scroll pour charger les produits...")
+    print("Scroll pour charger les produits...")
     for _ in range(15):
         await page.mouse.wheel(0, 1000)
         await asyncio.sleep(2)
 
-    print("🔍 Recherche des blocs produits...")
+    print("Recherche des blocs produits...")
     products = await page.query_selector_all("ul.product-grid__product-list > li.products-category-grid-block")
-    print(f"✅ Nombre de produits détectés : {len(products)}")
+    print(f"Nombre de produits détectés : {len(products)}")
 
     product_urls = []
     for product in products:
@@ -34,12 +34,12 @@ async def scrape_products_from_category(category_url: str, browser, max_products
             full_link = f"https://www.zara.com{link}" if link.startswith("/") else link
             product_urls.append(full_link)
 
-    print(f"🔗 {len(product_urls)} liens de produits collectés. Extraction via Crawl4AI en cours...")
+    print(f"{len(product_urls)} liens de produits collectés. Extraction via Crawl4AI en cours...")
 
     for i, url in enumerate(product_urls[:max_products]):
-        print(f"\n🔽 Produit {i+1} - {url}")
+        print(f"\n Produit {i+1} - {url}")
 
-        # Ouvre UNE NOUVELLE PAGE Playwright pour CHAQUE produit
+        # Pour Ouvrrir UNE NOUVELLE PAGE Playwright pour CHAQUE produit
         product_page = await browser.new_page()
         await product_page.goto(url, timeout=60000)
 
